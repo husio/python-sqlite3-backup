@@ -1,11 +1,11 @@
 #include "Python.h"
-/* from python-x.x/Modules/_sqlite */
+/* header from Python-X.X/Modules/_sqlite */
 #include "connection.h"
 #include "sqlite3.h"
 
 
 /* 
- * docs for backup api: 
+ * docs for sqlite3 backup api: 
  * from http://www.sqlite.org/backup.html
  *
  * Important: used interface is experimental and is known to be changed
@@ -20,7 +20,6 @@
  */
 static int
 copy_database(sqlite3 *db_to, sqlite3 *db_from) {
-    int rc;
     sqlite3_backup * db_bck;
 
     db_bck = sqlite3_backup_init(db_to, "main", db_from, "main");
@@ -29,14 +28,7 @@ copy_database(sqlite3 *db_to, sqlite3 *db_from) {
     }
     sqlite3_backup_step(db_bck, -1);
     sqlite3_backup_finish(db_bck);
-    rc = sqlite3_errcode(db_to);
-    if (rc != SQLITE_OK) {
-        return rc;
-    }
-    if (rc != SQLITE_OK) {
-        return rc;
-    }
-    return SQLITE_OK;
+    return sqlite3_errcode(db_to);
 }
 
 /* 
@@ -46,10 +38,9 @@ static PyObject*
 py_copy(PyObject *self, PyObject *args, PyObject *kwds)
 {
     int rc;
-    PyObject *db_source_conn, *db_dest_conn;
     static char *kw_list[] = {"source", "dest", NULL};
-    sqlite3 *db_source = NULL;
-    sqlite3 *db_dest = NULL;
+    PyObject *db_source_conn, *db_dest_conn;
+    sqlite3 *db_source, *db_dest;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO", kw_list,
                 &db_source_conn, &db_dest_conn)) {
@@ -70,24 +61,16 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
     rc = copy_database(db_dest, db_source);
     if (rc != SQLITE_OK) {
         PyErr_Format(PyExc_Exception, 
-                "Database copy fail: %s (%d)", 
-                sqlite3_errmsg(db_dest), rc);
+                "Database copy fail: %s (%d)", sqlite3_errmsg(db_dest), rc);
         return NULL;
     }
     Py_INCREF(Py_None);
     return Py_None;
 }
 
-static PyObject *
-py_load(PyObject *self, PyObject *args, PyObject *kwds)
-{
-    int rc;
-}
-
-
 static PyMethodDef sqlitebck_methods[] = {
     {"copy", (PyCFunction)py_copy, METH_VARARGS|METH_KEYWORDS,
-         "Backup any sqlite3 database"},
+        "Copy any sqlite3 database into given destination"},
 
     {NULL, NULL, 0, NULL}
 };
@@ -95,6 +78,5 @@ static PyMethodDef sqlitebck_methods[] = {
 void
 initsqlitebck(void)
 {
-  Py_InitModule("sqlitebck", sqlitebck_methods);
+    Py_InitModule("sqlitebck", sqlitebck_methods);
 }
-
