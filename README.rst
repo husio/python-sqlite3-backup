@@ -1,8 +1,9 @@
 Sqlite3 backup function implementation for Python sqlite3 module
 ================================================================
 
-Single function that allows to save any sqlite3 database into file. See the [C
-API docs](http://www.sqlite.org/c3ref/backup_finish.html) for more info.
+Single function that allows to save any sqlite3 database into file. See the
+`Sqlite3 C API docs`_ for more info.
+
 
 Build and installation
 ----------------------
@@ -44,3 +45,7 @@ Basic usage examply - in memory dumped into file::
     <sqlite3.Cursor object at 0xb73b2860>
     >>> curr2.fetchall()
     [(123,)]
+
+
+
+.. _Sqlite3 C API docs: http://www.sqlite.org/c3ref/backup_finish.html
