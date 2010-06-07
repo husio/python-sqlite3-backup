@@ -12,7 +12,9 @@ First, link CPython sqlite3 module sources::
     $ cd <sqlitebck>
     $ ls
     README  setup.py  src  tests.py
-    $ ln <python-code>/Modules/_sqlite
+    $ ln <python-code>/Modules/_sqlite .
+    $ ls
+    README  setup.py  _sqlite  src  tests.py
     $ python setup.py install
 
 
