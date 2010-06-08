@@ -14,18 +14,7 @@ See the `Sqlite3 C API docs`_ for more info.
 Build and installation
 ----------------------
 
-To build `sqlitebck` module, `sqlite3` and `Python` headers are required.
-Because `sqlitebck` depends on `sqlite3.connection` from standard CPython
-library, additional sources has to be linked into current directory::
-
-    $ cd <sqlitebck>
-    $ ls
-    README  setup.py  src  tests.py
-    $ ln -s <python-code>/Modules/_sqlite .
-    $ ls
-    README  setup.py  _sqlite  src  tests.py
-
-Now you can build or install `sqlitebck`::
+Now you can build or install `sqlitebck` using distutils::
 
     $ python setup.py install
 

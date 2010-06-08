@@ -33,7 +33,7 @@
 
 #include "Python.h"
 /* header from Python-X.X/Modules/_sqlite */
-#include "connection.h"
+#include "_sqlite/connection.h"
 #include "sqlite3.h"
 
 /*
