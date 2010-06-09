@@ -36,6 +36,7 @@
 #include "_sqlite/connection.h"
 #include "sqlite3.h"
 
+
 /*
  * Copy database from one to another
  *
@@ -81,9 +82,16 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
         PyErr_SetString(PyExc_Exception, "Cannot set destination database");
         return NULL;
     }
+    if (((pysqlite_Connection *)db_source_conn)->inTransaction) {
+        PyErr_Format(
+                ((pysqlite_Connection *)db_source_conn)->DatabaseError,
+                "Database in transaction");
+        return NULL;
+    }
     rc = copy_database(db_dest, db_source);
     if (rc != SQLITE_OK) {
-        PyErr_Format(PyExc_Exception, 
+        PyErr_Format(
+                ((pysqlite_Connection *)db_dest_conn)->DatabaseError,
                 "Database copy fail: %s (%d)", sqlite3_errmsg(db_dest), rc);
         return NULL;
     }

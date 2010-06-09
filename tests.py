@@ -59,6 +59,15 @@ class SqliteBackpTest(unittest.TestCase):
         d_curr.close()
         self.assertEqual(source_data, dest_data)
 
+    def test_database_locked(self):
+        db = sqlite3.connect(':memory:')
+        db2 = sqlite3.connect(':memory:')
+        curr = db.cursor()
+        curr.execute('CREATE TABLE foo(bar INTEGER)')
+        curr.execute('INSERT INTO foo VALUES(2)')
+        curr.close()
+        self.assertRaises(sqlite3.DatabaseException, sqlitebck.copy, db, db2)
+
     def tearDown(self):
         if os.path.isfile(self.db_filename):
             os.unlink(self.db_filename)
