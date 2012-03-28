@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Piotr Husiatyński.
+ * Copyright (c) 2010-2012 Piotr Husiatyński <phusiatynski@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -26,9 +26,6 @@
 /*
  * docs for sqlite3 backup api:
  * from http://www.sqlite.org/backup.html
- *
- * Important: used interface is experimental and is known to be changed
- * without notice.
  */
 
 #include "Python.h"
