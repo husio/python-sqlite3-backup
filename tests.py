@@ -12,7 +12,7 @@ class SqliteBackpTest(unittest.TestCase):
     def setUp(self):
         self.db_filename = '/tmp/dest_db.sqlite3.db'
         self.open_connections = []
-    
+
     def test_copy_from_memory_database(self):
         source_db = sqlite3.connect(':memory:')
         self.open_connections.append(source_db)
