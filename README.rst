@@ -7,7 +7,7 @@ into file (alternative to `iter dump`_ functionality).
 
 See the `Sqlite3 C API docs`_ for more info.
 
-The same functionality is being provided by the `apsw backup` API, which
+The same functionality is being provided by the `apsw backup`_ API, which
 provides even more information about the copy process.
 
 .. _iter dump: http://docs.python.org/release/2.6/library/sqlite3.html#sqlite3.Connection.iterdump
