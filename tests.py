@@ -1,10 +1,32 @@
-# -*- coding: utf-8 -*-
-
 import os
 import unittest
 import sqlite3
 
+def extend_importpath():
+    # extend import paths so that sqlitebck shared object file will be visible
+    # for import script
+    import sys
+    import fnmatch
+
+    libbck_path = None
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    for root, dirs, files in os.walk(basedir):
+        if libbck_path:
+            break
+        for fname in files:
+            if fnmatch.fnmatch(fname, 'sqlitebck*.so'):
+                libbck_path = os.path.join(basedir, root)
+                break
+    if not libbck_path:
+        raise Exception("Cannot find \"sqlitebck\" library file")
+    print(libbck_path)
+    sys.path.insert(0, libbck_path)
+
+
+extend_importpath()
+
 import sqlitebck
+
 
 
 class SqliteBackpTest(unittest.TestCase):
@@ -66,7 +88,7 @@ class SqliteBackpTest(unittest.TestCase):
         curr.execute('CREATE TABLE foo(bar INTEGER)')
         curr.execute('INSERT INTO foo VALUES(2)')
         curr.close()
-        self.assertRaises(sqlite3.DatabaseException, sqlitebck.copy, db, db2)
+        self.assertRaises(sqlite3.DatabaseError, sqlitebck.copy, db, db2)
 
     def tearDown(self):
         if os.path.isfile(self.db_filename):

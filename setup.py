@@ -4,7 +4,7 @@
 
 from distutils.core import setup, Extension
 
-module = Extension('sqlitebck', 
+module = Extension('sqlitebck',
         sources=['src/sqlitebck.c', ],
         libraries=['sqlite3', ])
 
