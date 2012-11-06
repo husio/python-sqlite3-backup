@@ -4,6 +4,8 @@
 import os
 from distutils.core import setup, Extension
 
+VERSION = '1.2'
+
 module = Extension('sqlitebck',
         sources=['src/sqlitebck.c', ],
         libraries=['sqlite3', ])
@@ -13,12 +15,12 @@ def long_description():
         return fd.read()
 
 setup(name='sqlitebck',
-    version='1.1',
+    version=VERSION,
     include_dirs=['/usr/local/include', ],
     description='Sqlite3 online backup API implementation.',
     long_description=long_description(),
     url='https://github.com/husio/python-sqlite3-backup',
-    download_url='https://github.com/husio/python-sqlite3-backup/tarball/master#egg=sqlitebck-1.1',
+    download_url='https://github.com/husio/python-sqlite3-backup/tarball/master#egg=sqlitebck-' + VERSION,
     ext_modules=[module, ],
     author='Piotr Husiatyński',
     author_email='phusiatynski@gmail.com',
