@@ -34,6 +34,17 @@
 #include "sqlite3.h"
 
 
+struct module_state {
+    PyObject *error;
+};
+
+#if PY_MAJOR_VERSION >= 3
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else /* PY_MAJOR_VERSION < 3 */
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif
+
 /*
  * Copy database from one to another
  *
@@ -103,8 +114,68 @@ static PyMethodDef sqlitebck_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+
+#if PY_MAJOR_VERSION >= 3
+
+static int sqlitebck_traverse(PyObject *m, visitproc visit, void *arg) {
+    Py_VISIT(GETSTATE(m)->error);
+    return 0;
+}
+
+static int sqlitebck_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    return 0;
+}
+
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        "sqlitebck",
+        NULL,
+        sizeof(struct module_state),
+        sqlitebck_methods,
+        NULL,
+        sqlitebck_traverse,
+        sqlitebck_clear,
+        NULL
+};
+#define INITERROR return NULL
+#else /* PY_MAJOR_VERSION < 3 */
+#define INITERROR return
+#endif
+
+
+
+#if PY_MAJOR_VERSION >= 3
+PyObject *
+PyInit_sqlitebck(void)
+#else
 void
 initsqlitebck(void)
+#endif
 {
-    Py_InitModule("sqlitebck", sqlitebck_methods);
+    PyObject *module;
+    struct module_state *st;
+
+#if PY_MAJOR_VERSION >= 3
+    module = PyModule_Create(&moduledef);
+#else
+    module = Py_InitModule("sqlitebck", sqlitebck_methods);
+#endif
+
+    if (module == NULL) {
+        INITERROR;
+    }
+    st = GETSTATE(module);
+    st->error = PyErr_NewException("sqlitebck.Error", NULL, NULL);
+    if (st->error == NULL) {
+        Py_DECREF(module);
+        INITERROR;
+    }
+
+#if PY_MAJOR_VERSION >= 3
+    return module;
+#endif
+
+
 }
