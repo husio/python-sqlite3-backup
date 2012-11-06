@@ -48,7 +48,9 @@ Basic usage example - memory database saved into file::
     >>> conn = sqlite3.connect(':memory:')
     >>> curr = conn.cursor()
 
-    # create table and put there some data
+
+Create table and put there some data::
+
     >>> curr.execute('CREATE TABLE foo (bar INTEGER)')
     <sqlite3.Cursor object at 0xb73b2800>
     >>> curr.execute('INSERT INTO foo VALUES (123)')
@@ -57,13 +59,15 @@ Basic usage example - memory database saved into file::
     >>> conn.commit()
     >>> import sqlitebck
 
-    # save in memory database (conn) into file
+Save in memory database (conn) into file::
+
     >>> conn2 = sqlite3.connect('/tmp/in_memory_sqlite_db_save.db')
     >>> sqlitebck.copy(conn, conn2)
     >>> conn.close()
     >>> curr2 = conn2.cursor()
 
-    # check if data is in file database ;)
+Check if data is in file database::
+
     >>> curr2.execute('SELECT * FROM foo');
     <sqlite3.Cursor object at 0xb73b2860>
     >>> curr2.fetchall()

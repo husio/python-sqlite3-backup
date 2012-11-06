@@ -145,11 +145,10 @@ static struct PyModuleDef moduledef = {
 #endif
 
 
-
 #if PY_MAJOR_VERSION >= 3
 PyObject *
 PyInit_sqlitebck(void)
-#else
+#else /* PY_MAJOR_VERSION < 3 */
 void
 initsqlitebck(void)
 #endif
@@ -159,7 +158,7 @@ initsqlitebck(void)
 
 #if PY_MAJOR_VERSION >= 3
     module = PyModule_Create(&moduledef);
-#else
+#else /* PY_MAJOR_VERSION < 3 */
     module = Py_InitModule("sqlitebck", sqlitebck_methods);
 #endif
 
@@ -176,6 +175,4 @@ initsqlitebck(void)
 #if PY_MAJOR_VERSION >= 3
     return module;
 #endif
-
-
 }

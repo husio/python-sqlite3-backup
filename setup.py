@@ -13,12 +13,12 @@ def long_description():
         return fd.read()
 
 setup(name='sqlitebck',
-    version='1.0',
+    version='1.1',
     include_dirs=['/usr/local/include', ],
     description='Sqlite3 online backup API implementation.',
     long_description=long_description(),
     url='https://github.com/husio/python-sqlite3-backup',
-    download_url='https://github.com/husio/python-sqlite3-backup/tarball/master#egg=sqlitebck-1.0',
+    download_url='https://github.com/husio/python-sqlite3-backup/tarball/master#egg=sqlitebck-1.1',
     ext_modules=[module, ],
     author='Piotr Husiatyński',
     author_email='phusiatynski@gmail.com',
@@ -29,6 +29,7 @@ setup(name='sqlitebck',
         'Operating System :: OS Independent',
         'Topic :: Database',
         'Programming Language :: C',
-        'Programming Language :: Python :: 2 :: Only',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: Implementation :: CPython',
     ])
