@@ -28,12 +28,63 @@ extend_importpath()
 import sqlitebck
 
 
+class CopyInheritedTest(unittest.TestCase):
+    def setUp(self):
+        class Connection(sqlite3.Connection):
+            pass
+
+        self.inherited = Connection(':memory:')
+        self.native = sqlite3.connect(':memory:')
+
+    def tearDown(self):
+        self.inherited.close()
+        self.native.close()
+
+    def create_test_db(self, conn):
+        curr = conn.cursor()
+        curr.execute('CREATE TABLE t(col VARCHAR(20))')
+        curr.execute('INSERT INTO t(col) VALUES(\'test\')')
+        conn.commit()
+        curr.close()
+
+    def test_inerited_source(self):
+        self.create_test_db(self.inherited)
+        sqlitebck.copy(self.inherited, self.native)
+        curr = self.native.cursor()
+        curr.execute('SELECT col FROM t')
+        self.assertEqual(curr.fetchone(), ('test', ))
+
+    def test_inerited_destination(self):
+        self.create_test_db(self.native)
+        sqlitebck.copy(self.native, self.inherited)
+        curr = self.inherited.cursor()
+        curr.execute('SELECT col FROM t')
+        self.assertEqual(curr.fetchone(), ('test', ))
+
 
 class SqliteBackpTest(unittest.TestCase):
-
     def setUp(self):
         self.db_filename = '/tmp/dest_db.sqlite3.db'
         self.open_connections = []
+
+    def tearDown(self):
+        if os.path.isfile(self.db_filename):
+            os.unlink(self.db_filename)
+        # cleanup databases connections...
+        for db_conn in self.open_connections:
+            db_conn.close()
+
+    def test_copy_from_not_sqlite_db(self):
+        source_non_db = object()
+        dest_db = sqlite3.connect(':memory:')
+        self.assertRaises(TypeError,
+                sqlitebck.copy, source_non_db, dest_db)
+
+    def test_copy_to_not_sqlite_db(self):
+        source_db = sqlite3.connect(':memory:')
+        dest_non_db = object()
+        self.assertRaises(TypeError,
+                sqlitebck.copy, source_db, dest_non_db)
 
     def test_copy_from_memory_database(self):
         source_db = sqlite3.connect(':memory:')
@@ -89,13 +140,6 @@ class SqliteBackpTest(unittest.TestCase):
         curr.execute('INSERT INTO foo VALUES(2)')
         curr.close()
         self.assertRaises(sqlite3.DatabaseError, sqlitebck.copy, db, db2)
-
-    def tearDown(self):
-        if os.path.isfile(self.db_filename):
-            os.unlink(self.db_filename)
-        # cleanup databases connections...
-        for db_conn in self.open_connections:
-            db_conn.close()
 
 
 

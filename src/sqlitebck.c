@@ -28,6 +28,8 @@
  * from http://www.sqlite.org/backup.html
  */
 
+#include <string.h>
+
 #include "Python.h"
 /* header from Python-X.X/Modules/_sqlite */
 #include "_sqlite/connection.h"
@@ -64,6 +66,36 @@ copy_database(sqlite3 *db_to, sqlite3 *db_from) {
 }
 
 /*
+ * A bit lame way of checking if given python object is sqlite database. The
+ * proper way would be to use PyObject_TypeCheck call, but having
+ * pysqlite_ConnectionType  requires too many dependencies.
+ *
+ * It's not bullet proff, but let's try too keep this module small.
+ */
+static int
+is_sqlite_type(PyTypeObject *tp)
+{
+    return strcmp(tp->tp_name, "sqlite3.Connection") == 0;
+}
+
+static int
+is_sqlite_object(PyObject *o)
+{
+    PyTypeObject *tp = o->ob_type;
+
+    for (;;) {
+        if (!tp) {
+            return 0;
+        }
+        if (is_sqlite_type(tp)) {
+            return 1;
+        }
+        tp = tp->tp_base;
+    }
+}
+
+
+/*
  * copy one python database into another
  */
 static PyObject*
@@ -79,7 +111,19 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
         PyErr_BadArgument();
         return NULL;
     }
-    /* TOOD: type checking? */
+
+    if (!is_sqlite_object(db_source_conn)) {
+        PyErr_SetString(PyExc_TypeError,
+                "Given source object is not a sqlite database");
+        return NULL;
+    }
+    if (!is_sqlite_object(db_dest_conn)) {
+        PyErr_SetString(PyExc_TypeError,
+                "Given destination object is not a sqlite database");
+        return NULL;
+    }
+
+
     db_source = ((pysqlite_Connection *)db_source_conn)->db;
     db_dest = ((pysqlite_Connection *)db_dest_conn)->db;
     if (db_source == NULL) {
