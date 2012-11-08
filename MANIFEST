@@ -1,4 +1,4 @@
-README
+README.txt
 setup.py
 src/sqlitebck.c
 src/_sqlite/cache.h
