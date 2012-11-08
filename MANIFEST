@@ -1,0 +1,4 @@
+README
+setup.py
+src/sqlitebck.c
+recursive-include src/_sqlite/*
