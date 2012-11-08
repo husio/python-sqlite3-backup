@@ -12,7 +12,7 @@ provides even more information about the copy process.
 
 .. _iter dump: http://docs.python.org/release/2.6/library/sqlite3.html#sqlite3.Connection.iterdump
 .. _Sqlite3 C API docs: http://www.sqlite.org/c3ref/backup_finish.html
-.. _apsw buckup: http://apidoc.apsw.googlecode.com/hg/backup.html
+.. _apsw backup: http://apidoc.apsw.googlecode.com/hg/backup.html
 
 
 Build and installation

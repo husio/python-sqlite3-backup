@@ -1,4 +1,6 @@
 README
 setup.py
 src/sqlitebck.c
-recursive-include src/_sqlite/*
+src/_sqlite/cache.h
+src/_sqlite/connection.h
+src/_sqlite/module.h

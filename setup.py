@@ -4,15 +4,17 @@
 import os
 from distutils.core import setup, Extension
 
-VERSION = '1.2'
-
-module = Extension('sqlitebck',
-        sources=['src/sqlitebck.c', ],
-        libraries=['sqlite3', ])
+VERSION = '1.2.1'
 
 def long_description():
-    with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as fd:
+    fd_path = os.path.join(os.path.dirname(__file__), 'README')
+    if not os.path.isfile(fd_path):
+        return ''
+    with open(fd_path) as fd:
         return fd.read()
+
+module = Extension('sqlitebck', sources=['src/sqlitebck.c'],
+        libraries=['sqlite3'])
 
 setup(name='sqlitebck',
     version=VERSION,
