@@ -38,6 +38,7 @@
 
 struct module_state {
     PyObject *error;
+    PyObject *connection_type;
 };
 
 #if PY_MAJOR_VERSION >= 3
@@ -66,34 +67,24 @@ copy_database(sqlite3 *db_to, sqlite3 *db_from) {
 }
 
 /*
- * A bit lame way of checking if given python object is sqlite database. The
- * proper way would be to use PyObject_TypeCheck call, but having
- * pysqlite_ConnectionType  requires too many dependencies.
+ * Check if a an object is an instance of sqlite3.Connection.
  *
- * It's not bullet proff, but let's try too keep this module small.
+ * Returns 1 if the object is a sqlite3.Connection, 0 if it is not a
+ * connection, and -1 if an error occured.
  */
 static int
-is_sqlite_type(PyTypeObject *tp)
+is_sqlite_object(PyObject *m, PyObject *o)
 {
-    return strcmp(tp->tp_name, "sqlite3.Connection") == 0;
-}
+    PyObject *connection_type;
 
-static int
-is_sqlite_object(PyObject *o)
-{
-    PyTypeObject *tp = o->ob_type;
-
-    for (;;) {
-        if (!tp) {
-            return 0;
-        }
-        if (is_sqlite_type(tp)) {
-            return 1;
-        }
-        tp = tp->tp_base;
+    if (!(connection_type = GETSTATE(m)->connection_type)) {
+        PyErr_SetString(
+                   PyExc_AssertionError,
+                   "sqlite3.Connection reference was NULL");
+        return -1;
     }
+    return PyObject_IsInstance(o, connection_type);
 }
-
 
 /*
  * copy one python database into another
@@ -112,14 +103,20 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
         return NULL;
     }
 
-    if (!is_sqlite_object(db_source_conn)) {
-        PyErr_SetString(PyExc_TypeError,
-                "Given source object is not a sqlite database");
+    if (!is_sqlite_object(self, db_source_conn)) {
+        if (!PyErr_Occurred()) {
+            PyErr_SetString(
+                       PyExc_TypeError,
+                       "Given source object is not a sqlite database");
+        }
         return NULL;
     }
-    if (!is_sqlite_object(db_dest_conn)) {
-        PyErr_SetString(PyExc_TypeError,
-                "Given destination object is not a sqlite database");
+    if (!is_sqlite_object(self, db_dest_conn)) {
+        if (!PyErr_Occurred()) {
+            PyErr_SetString(
+                       PyExc_TypeError,
+                       "Given destination object is not a sqlite database");
+        }
         return NULL;
     }
 
@@ -163,11 +160,13 @@ static PyMethodDef sqlitebck_methods[] = {
 
 static int sqlitebck_traverse(PyObject *m, visitproc visit, void *arg) {
     Py_VISIT(GETSTATE(m)->error);
+    Py_VISIT(GETSTATE(m)->connection_type);
     return 0;
 }
 
 static int sqlitebck_clear(PyObject *m) {
     Py_CLEAR(GETSTATE(m)->error);
+    Py_CLEAR(GETSTATE(m)->connection_type);
     return 0;
 }
 
@@ -198,6 +197,7 @@ initsqlitebck(void)
 #endif
 {
     PyObject *module;
+    PyObject *sqlite3_module;
     struct module_state *st;
 
 #if PY_MAJOR_VERSION >= 3
@@ -209,7 +209,20 @@ initsqlitebck(void)
     if (module == NULL) {
         INITERROR;
     }
+    if (!(sqlite3_module = PyImport_ImportModule("sqlite3"))) {
+        Py_DECREF(module);
+        INITERROR;
+    }
+
     st = GETSTATE(module);
+
+    st->connection_type = PyObject_GetAttrString(sqlite3_module, "Connection");
+    Py_DECREF(sqlite3_module);
+    if (!st->connection_type) {
+        Py_DECREF(module);
+        INITERROR;
+    }
+
     st->error = PyErr_NewException("sqlitebck.Error", NULL, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
