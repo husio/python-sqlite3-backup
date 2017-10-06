@@ -54,14 +54,22 @@ static struct module_state _state;
  * Returns SQLITE_OK or any SQLITE error code on fail.
  */
 static int
-copy_database(sqlite3 *db_to, sqlite3 *db_from) {
+copy_database(sqlite3 *db_to, sqlite3 *db_from, int pages, int sleep) {
     sqlite3_backup * db_bck;
+    int rc;
 
     db_bck = sqlite3_backup_init(db_to, "main", db_from, "main");
     if (db_bck == NULL) {
         return sqlite3_errcode(db_to);
     }
-    sqlite3_backup_step(db_bck, -1);
+
+    do {
+        rc = sqlite3_backup_step(db_bck, pages);
+        if(sleep > 0 && (rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED)) {
+          sqlite3_sleep(sleep);
+        }
+    } while( rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED );
+
     sqlite3_backup_finish(db_bck);
     return sqlite3_errcode(db_to);
 }
@@ -93,12 +101,13 @@ static PyObject*
 py_copy(PyObject *self, PyObject *args, PyObject *kwds)
 {
     int rc;
-    static char *kw_list[] = {"source", "dest", NULL};
+    static char *kw_list[] = {"source", "dest", "pages", "sleep", NULL};
     PyObject *db_source_conn, *db_dest_conn;
     sqlite3 *db_source, *db_dest;
+    int pages, sleep;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO", kw_list,
-                &db_source_conn, &db_dest_conn)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|ii", kw_list,
+                &db_source_conn, &db_dest_conn, &pages, &sleep)) {
         PyErr_BadArgument();
         return NULL;
     }
@@ -119,7 +128,13 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
         }
         return NULL;
     }
-
+    if (pages < -1 || pages == 0) {
+        pages = -1;
+    }
+    if (sleep <= 0) {
+        // default to sleep 10ms between page loads
+        sleep = 10;
+    }
 
     db_source = ((pysqlite_Connection *)db_source_conn)->db;
     db_dest = ((pysqlite_Connection *)db_dest_conn)->db;
@@ -137,7 +152,8 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
                 "Database in transaction");
         return NULL;
     }
-    rc = copy_database(db_dest, db_source);
+
+    rc = copy_database(db_dest, db_source, pages, sleep);
     if (rc != SQLITE_OK) {
         PyErr_Format(
                 ((pysqlite_Connection *)db_dest_conn)->DatabaseError,
