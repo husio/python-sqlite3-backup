@@ -146,7 +146,7 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
         PyErr_SetString(PyExc_Exception, "Cannot set destination database");
         return NULL;
     }
-    if (((pysqlite_Connection *)db_source_conn)->inTransaction) {
+    if (!sqlite3_get_autocommit(((pysqlite_Connection *)db_source_conn)->db)) {
         PyErr_Format(
                 ((pysqlite_Connection *)db_source_conn)->DatabaseError,
                 "Database in transaction");
