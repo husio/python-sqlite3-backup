@@ -1,6 +1,8 @@
 # `sqlitebck`
 
 [![Build Status](https://travis-ci.org/husio/python-sqlite3-backup.svg?branch=master)](https://travis-ci.org/husio/python-sqlite3-backup)
+[![PyPI version](https://badge.fury.io/py/sqlitebck.svg)](https://badge.fury.io/py/sqlitebck)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
 ## SQLite3 backup function implementation for Python sqlite3 module
