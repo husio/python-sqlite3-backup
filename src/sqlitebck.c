@@ -128,10 +128,10 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
         }
         return NULL;
     }
-    if (pages < -1 || pages == 0) {
+    if (pages <= 0) {
         pages = -1;
     }
-    if (sleep <= 0) {
+    if (sleep < 0) {
         // default to sleep 10ms between page loads
         sleep = 10;
     }
