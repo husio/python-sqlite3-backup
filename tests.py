@@ -1,6 +1,8 @@
 import os
-import unittest
 import sqlite3
+import sys
+import unittest
+
 
 def extend_importpath():
     # extend import paths so that sqlitebck shared object file will be visible
@@ -25,7 +27,7 @@ def extend_importpath():
 
 extend_importpath()
 
-import sqlitebck
+import sqlitebck  # noqa
 
 
 class CopyInheritedTest(unittest.TestCase):
@@ -77,14 +79,12 @@ class SqliteBackpTest(unittest.TestCase):
     def test_copy_from_not_sqlite_db(self):
         source_non_db = object()
         dest_db = sqlite3.connect(':memory:')
-        self.assertRaises(TypeError,
-                sqlitebck.copy, source_non_db, dest_db)
+        self.assertRaises(TypeError, sqlitebck.copy, source_non_db, dest_db)
 
     def test_copy_to_not_sqlite_db(self):
         source_db = sqlite3.connect(':memory:')
         dest_non_db = object()
-        self.assertRaises(TypeError,
-                sqlitebck.copy, source_db, dest_non_db)
+        self.assertRaises(TypeError, sqlitebck.copy, source_db, dest_non_db)
 
     def test_copy_from_memory_database(self):
         source_db = sqlite3.connect(':memory:')
@@ -119,6 +119,8 @@ class SqliteBackpTest(unittest.TestCase):
         s_curr.execute('SELECT * FROM baz ORDER BY foo DESC')
         source_data = s_curr.fetchall()
         s_curr.close()
+        source_db.rollback()
+
         # save database to file
         db_dest = sqlite3.connect(':memory:')
         sqlitebck.copy(source_db, db_dest)
@@ -142,7 +144,10 @@ class SqliteBackpTest(unittest.TestCase):
         self.assertRaises(sqlite3.DatabaseError, sqlitebck.copy, db, db2)
 
 
-
-
 if __name__ == '__main__':
+    sys.stderr.write("""
+SQLite module version: {vsqlite}
+Python version: {vpython}
+
+    """.format(vpython=sys.version, vsqlite=sqlite3.version))
     unittest.main()
