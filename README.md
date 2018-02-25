@@ -81,7 +81,7 @@ If you want to load a file database into a memory:
 >>> sqlitebck.copy(conn2, conn)
 ```
 
-If you want to copy a (large) online database, you can release the read-lock on the source database for a specified time between copying each batch of pages:
+If you want to copy a (large) online database, you can release the read-lock on the source database for a specified time between [copying each batch of pages](https://sqlite.org/c3ref/backup_finish.html#sqlite3backupstep):
 
 ```python
 >>> sqlitebck.copy(conn2, conn, pages, sleep)
