@@ -65,10 +65,10 @@ copy_database(sqlite3 *db_to, sqlite3 *db_from, int pages, int sleep) {
 
     do {
         rc = sqlite3_backup_step(db_bck, pages);
-        if(sleep > 0 && (rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED)) {
+        if (sleep > 0 && (rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED)) {
           sqlite3_sleep(sleep);
         }
-    } while( rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED );
+    } while (rc==SQLITE_OK || rc==SQLITE_BUSY || rc==SQLITE_LOCKED);
 
     sqlite3_backup_finish(db_bck);
     return sqlite3_errcode(db_to);
@@ -104,7 +104,8 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
     static char *kw_list[] = {"source", "dest", "pages", "sleep", NULL};
     PyObject *db_source_conn, *db_dest_conn;
     sqlite3 *db_source, *db_dest;
-    int pages, sleep;
+    int pages = 0;
+    int sleep = 10; // default to 10ms
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|ii", kw_list,
                 &db_source_conn, &db_dest_conn, &pages, &sleep)) {
@@ -132,8 +133,7 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
         pages = -1;
     }
     if (sleep < 0) {
-        // default to sleep 10ms between page loads
-        sleep = 10;
+        sleep = 0;
     }
 
     db_source = ((pysqlite_Connection *)db_source_conn)->db;
@@ -153,7 +153,9 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
         return NULL;
     }
 
+    Py_BEGIN_ALLOW_THREADS;
     rc = copy_database(db_dest, db_source, pages, sleep);
+    Py_END_ALLOW_THREADS;
     if (rc != SQLITE_OK) {
         PyErr_Format(
                 ((pysqlite_Connection *)db_dest_conn)->DatabaseError,
