@@ -105,7 +105,7 @@ py_copy(PyObject *self, PyObject *args, PyObject *kwds)
     PyObject *db_source_conn, *db_dest_conn;
     sqlite3 *db_source, *db_dest;
     int pages = 0;
-    int sleep = 10; // default to 10ms
+    int sleep = 0; // default to 0ms
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO|ii", kw_list,
                 &db_source_conn, &db_dest_conn, &pages, &sleep)) {
