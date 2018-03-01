@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import sys
+import time
 import unittest
 
 
@@ -143,11 +144,31 @@ class SqliteBackpTest(unittest.TestCase):
         curr.close()
         self.assertRaises(sqlite3.DatabaseError, sqlitebck.copy, db, db2)
 
+    def test_copy_multiple_pages(self):
+        db = sqlite3.connect(':memory:')
+        curr = db.cursor()
+        curr.execute('CREATE TABLE foo(bar TEXT)')
+        args = (
+            'a' * (2 * SQLITE3_PAGE_SIZE),
+            'b' * SQLITE3_PAGE_SIZE,
+        )
+        curr.execute('INSERT INTO foo VALUES (?), (?)', args)
+        db.commit()
+        curr.close()
+
+        db2 = sqlite3.connect(':memory:')
+        sqlitebck.copy(db, db2, pages=1, sleep=10)
+
+
+
+# https://www.sqlite.org/pgszchng2016.html
+SQLITE3_PAGE_SIZE = 4096
+
 
 if __name__ == '__main__':
     sys.stderr.write("""
 SQLite module version: {vsqlite}
 Python version: {vpython}
 
-    """.format(vpython=sys.version, vsqlite=sqlite3.version))
+""".format(vpython=sys.version, vsqlite=sqlite3.version))
     unittest.main()

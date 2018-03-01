@@ -81,14 +81,12 @@ If you want to load a file database into a memory:
 >>> sqlitebck.copy(conn2, conn)
 ```
 
-If you want to copy a (large) online database, you can release the read-lock on the source database for a specified time between copying each batch of pages:
+If you want to copy a (large) online database, you can release the read-lock on the source database for a specified time between [copying each batch of pages](https://sqlite.org/c3ref/backup_finish.html#sqlite3backupstep):
 
 ```python
 >>> sqlitebck.copy(conn2, conn, pages, sleep)
 ```
 
-Where the integer pages > 0 is the number of pages to read, and the intger sleep > 0 is the number of ms to release the read-lock between copying batches of pages.
-
-Defaults are pages = -1 (copy all pages at once), and sleep = 10 when pages > 0.
+By default, `pages=0` and `sleep=0`, which copies all pages with no interruption.
 
 The online copying process handles situations with a write-lock on the source database and copying of changes written to the source database while copying batches of pages.

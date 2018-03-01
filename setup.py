@@ -4,7 +4,7 @@
 import os
 from distutils.core import setup, Extension
 
-VERSION = '1.3'
+VERSION = '1.4'
 
 def long_description():
     fd_path = os.path.join(os.path.dirname(__file__), 'README')
