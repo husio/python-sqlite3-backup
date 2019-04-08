@@ -5,6 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
+Backup function is now provided by the standard library 
+- https://bugs.python.org/issue27645
+- https://docs.python.org/3/library/sqlite3.html#sqlite3.Connection.backup
+
+
 ## SQLite3 backup function implementation for Python sqlite3 module
 
 Single function that allows to copy content of one sqlite3 database to another one. You can use this for example for loading and dumping in memory database (`:memory:`) into a file (alternative to the [iter dump](https://docs.python.org/2/library/sqlite3.html#sqlite3.Connection.iterdump) functionality).
